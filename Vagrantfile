@@ -3,7 +3,7 @@ MACHINES = {
   # VM name "kernel update"
   :"kernel-update" => {
               # VM box
-              :box_name => "centos/7",
+              :box_name => "incertov/centos-7-5",
               # VM CPU count
               :cpus => 2,
               # VM RAM size (Mb)
@@ -19,17 +19,22 @@ Vagrant.configure("2") do |config|
   MACHINES.each do |boxname, boxconfig|
     # Disable shared folders
     config.vm.synced_folder ".", "/vagrant", disabled: true
-    # Apply VM config
+    # Disable audio
+    config.vm.provider "virtualbox" do |vb|
+      vb.customize ["modifyvm", :id, "--audio", "none"]
+    end
+      # Apply VM config
     config.vm.define boxname do |box|
       # Set VM base box and hostname
       box.vm.box = boxconfig[:box_name]
       box.vm.host_name = boxname.to_s
       # Additional network config if present
-      if boxconfig.key?(:net)
-        boxconfig[:net].each do |ipconf|
-          box.vm.network "private_network", ipconf
-        end
-      end
+      #config.vm.network "private_network", adapter: 2, ip: '10.10.10.2', netmask: "255.255.255.0"
+      #config.vm.network "public_network", adapter: 3, type: "dhcp", bridge: "enp3s0"
+      # default router
+      #config.vm.provision "shell",
+      #  run: "always",
+      #  inline: "route add default gw 192.168.88.1"
       # Port-forward config if present
       if boxconfig.key?(:forwarded_port)
         boxconfig[:forwarded_port].each do |port|
@@ -44,4 +49,4 @@ Vagrant.configure("2") do |config|
       end
     end
   end
-end
+ends
